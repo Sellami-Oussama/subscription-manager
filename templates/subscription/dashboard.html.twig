@@ -1,0 +1,230 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .dashboard-card {
+        transition: transform 0.2s;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card {
+        border-left: 4px solid;
+    }
+    .stat-icon {
+        font-size: 2rem;
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Dashboard</h1>
+    <a href="{{ path('app_subscription_new') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>New Subscription
+    </a>
+</div>
+{% endblock %}
+
+{% block body %}
+{# Statistics Overview #}
+<div class="row mb-4">
+    {# Total Active Subscriptions #}
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card border-primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Active Subscriptions</h6>
+                        <h3 class="mb-0">{{ totalActive }}</h3>
+                    </div>
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Monthly Total #}
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card border-success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Monthly Total</h6>
+                        <h3 class="mb-0">{{ monthlyTotal|number_format(2) }} €</h3>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Yearly Total #}
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card border-info h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Yearly Total</h6>
+                        <h3 class="mb-0">{{ yearlyTotal|number_format(2) }} €</h3>
+                    </div>
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Upcoming Renewals #}
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card border-warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Upcoming Renewals</h6>
+                        <h3 class="mb-0">{{ upcomingRenewals|length }}</h3>
+                    </div>
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {# Subscriptions by Category #}
+    <div class="col-md-6 mb-4">
+        <div class="card dashboard-card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Subscriptions by Category</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-center">Count</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in byCategory %}
+                            <tr>
+                                <td>{{ category.category }}</td>
+                                <td class="text-center">{{ category.count }}</td>
+                                <td class="text-end">{{ category.total|number_format(2) }} €</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Subscriptions by Provider #}
+    <div class="col-md-6 mb-4">
+        <div class="card dashboard-card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Subscriptions by Provider</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Provider</th>
+                                <th class="text-center">Count</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for provider in byProvider %}
+                            <tr>
+                                <td>{{ provider.provider }}</td>
+                                <td class="text-center">{{ provider.count }}</td>
+                                <td class="text-end">{{ provider.total|number_format(2) }} €</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Upcoming Renewals #}
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Upcoming Renewals (Next 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                {% if upcomingRenewals|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Provider</th>
+                                <th>Price</th>
+                                <th>Renewal Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subscription in upcomingRenewals %}
+                            <tr>
+                                <td>{{ subscription.name }}</td>
+                                <td>{{ subscription.category.name }}</td>
+                                <td>{{ subscription.provider.name }}</td>
+                                <td>{{ subscription.formattedPrice }}</td>
+                                <td>
+                                    <span class="text-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ subscription.renewalDate|date('Y-m-d') }}
+                                        (in {{ subscription.renewalDays }} days)
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_subscription_show', {id: subscription.id}) }}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No upcoming renewals in the next 7 days</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+{% endblock %}
+{% endblock %}

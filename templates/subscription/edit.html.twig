@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit {{ subscription.name }} - Subscriptions - {{ parent() }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Edit Subscription</h1>
+    <a href="{{ path('app_subscription_show', {id: subscription.id}) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Details
+    </a>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                {{ form_start(form) }}
+                <div class="row">
+                    {# Category and Provider #}
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.category) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.provider) }}
+                    </div>
+
+                    {# Name #}
+                    <div class="col-12 mb-3">
+                        {{ form_row(form.name) }}
+                    </div>
+
+                    {# Price and Billing Cycle #}
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.price) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.billingCycle) }}
+                    </div>
+
+                    {# Renewal Date and Status #}
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.renewalDate) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_row(form.status) }}
+                    </div>
+
+                    {# Notes #}
+                    <div class="col-12 mb-3">
+                        {{ form_row(form.notes) }}
+                    </div>
+                </div>
+
+                {# Submit Button #}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-1"></i>Update Subscription
+                    </button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Help Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-info-circle me-1"></i>Billing Cycles</h6>
+                    <ul class="list-unstyled ps-3 mb-0">
+                        <li><strong>Monthly:</strong> Billed every month</li>
+                        <li><strong>Quarterly:</strong> Billed every 3 months</li>
+                        <li><strong>Yearly:</strong> Billed annually</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <h6><i class="fas fa-calendar-alt me-1"></i>Renewal Date</h6>
+                    <p class="text-muted small mb-0">
+                        Select the next date when the subscription will be renewed. 
+                        You'll receive notifications before the renewal date.
+                    </p>
+                </div>
+
+                <div>
+                    <h6><i class="fas fa-tag me-1"></i>Status Types</h6>
+                    <ul class="list-unstyled ps-3 mb-0">
+                        <li><strong>Active:</strong> Currently valid subscription</li>
+                        <li><strong>Cancelled:</strong> Subscription has been cancelled</li>
+                        <li><strong>Expired:</strong> Subscription has expired</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Current Status</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Created:</dt>
+                    <dd class="col-sm-8">{{ subscription.createdAt|date('Y-m-d H:i') }}</dd>
+                    
+                    <dt class="col-sm-4">Updated:</dt>
+                    <dd class="col-sm-8">{{ subscription.updatedAt|date('Y-m-d H:i') }}</dd>
+                    
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        {% if subscription.isActive() %}
+                            <span class="badge bg-success">Active</span>
+                        {% elseif subscription.isCancelled() %}
+                            <span class="badge bg-warning">Cancelled</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Expired</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,69 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
+    <div class="container">
+        {# Logo and Brand #}
+        <a class="navbar-brand d-flex align-items-center" href="{{ path('app_subscription_dashboard') }}">
+            <i class="fas fa-calendar-check fa-lg me-2"></i>
+            <span class="fw-semibold">Subscription Manager</span>
+        </a>
+        
+        {# Mobile Toggle Button #}
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
+                aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        {# Navigation Items #}
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 py-2 rounded-pill {{ app.request.get('_route') starts with 'app_subscription_' ? 'active bg-white bg-opacity-25' }}" 
+                       href="{{ path('app_subscription_index') }}">
+                        <i class="fas fa-list me-2"></i>Subscriptions
+                    </a>
+                </li>
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 py-2 rounded-pill {{ app.request.get('_route') starts with 'app_category_' ? 'active bg-white bg-opacity-25' }}" 
+                       href="{{ path('app_category_index') }}">
+                        <i class="fas fa-tags me-2"></i>Categories
+                    </a>
+                </li>
+                <li class="nav-item mx-1">
+                    <a class="nav-link px-3 py-2 rounded-pill {{ app.request.get('_route') starts with 'app_provider_' ? 'active bg-white bg-opacity-25' }}" 
+                       href="{{ path('app_provider_index') }}">
+                        <i class="fas fa-building me-2"></i>Providers
+                    </a>
+                </li>
+            </ul>
+            
+            {# Right Side Items #}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link px-3 py-2 d-flex align-items-center rounded-pill {{ app.request.get('_route') == 'app_subscription_dashboard' ? 'active bg-white bg-opacity-25' }}" 
+                       href="{{ path('app_subscription_dashboard') }}">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item ms-2">
+                    <a class="btn btn-light rounded-pill px-3 py-2" href="{{ path('app_subscription_new') }}">
+                        <i class="fas fa-plus me-2"></i>New Subscription
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{# Add a subtle shadow when scrolling #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 0) {
+            navbar.classList.add('shadow');
+        } else {
+            navbar.classList.remove('shadow');
+        }
+    });
+});
+</script>

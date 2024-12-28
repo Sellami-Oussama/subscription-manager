@@ -1,0 +1,205 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Subscriptions - {{ parent() }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Subscriptions</h1>
+    <div>
+        <a href="{{ path('app_subscription_dashboard') }}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-chart-line me-1"></i>Dashboard
+        </a>
+        <a href="{{ path('app_subscription_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>New Subscription
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block body %}
+{# Active Subscriptions Card #}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Active Subscriptions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Provider</th>
+                        <th>Price</th>
+                        <th>Billing Cycle</th>
+                        <th>Renewal Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscription in activeSubscriptions %}
+                    <tr{% if subscription.isRenewalSoon() %} class="table-warning"{% endif %}>
+                        <td>{{ subscription.name }}</td>
+                        <td>
+                            <a href="{{ path('app_category_show', {id: subscription.category.id}) }}">
+                                {{ subscription.category.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_provider_show', {id: subscription.provider.id}) }}">
+                                {{ subscription.provider.name }}
+                            </a>
+                        </td>
+                        <td>{{ subscription.formattedPrice }}</td>
+                        <td>{{ subscription.billingCycle|capitalize }}</td>
+                        <td>
+                            {% if subscription.isRenewalSoon() %}
+                                <span class="text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    {{ subscription.renewalDate|date('Y-m-d') }}
+                                    (in {{ subscription.renewalDays }} days)
+                                </span>
+                            {% else %}
+                                {{ subscription.renewalDate|date('Y-m-d') }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ path('app_subscription_show', {id: subscription.id}) }}" 
+                                   class="btn btn-info" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('app_subscription_edit', {id: subscription.id}) }}" 
+                                   class="btn btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-danger" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#cancelModal{{ subscription.id }}"
+                                        title="Cancel">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            {# Cancel Modal #}
+                            <div class="modal fade" id="cancelModal{{ subscription.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Cancellation</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to cancel the subscription "{{ subscription.name }}"?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form action="{{ path('app_subscription_cancel', {id: subscription.id}) }}" method="post">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ subscription.id) }}">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-danger">Cancel Subscription</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No active subscriptions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{# Other Subscriptions Card #}
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Cancelled & Expired Subscriptions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Provider</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscription in subscriptions %}
+                        {% if not subscription.isActive() %}
+                        <tr>
+                            <td>{{ subscription.name }}</td>
+                            <td>{{ subscription.category.name }}</td>
+                            <td>{{ subscription.provider.name }}</td>
+                            <td>{{ subscription.formattedPrice }}</td>
+                            <td>
+                                {% if subscription.isCancelled() %}
+                                    <span class="badge bg-warning">Cancelled</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ path('app_subscription_show', {id: subscription.id}) }}" 
+                                       class="btn btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal{{ subscription.id }}"
+                                            title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                {# Delete Modal #}
+                                <div class="modal fade" id="deleteModal{{ subscription.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm Delete</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete the subscription "{{ subscription.name }}"?</p>
+                                                <p class="text-danger mb-0">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                                    This action cannot be undone.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="{{ path('app_subscription_delete', {id: subscription.id}) }}" method="post">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ subscription.id) }}">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No inactive subscriptions found</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
